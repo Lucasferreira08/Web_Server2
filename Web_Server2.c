@@ -16,7 +16,7 @@
 #include "hardware/clocks.h"    // API de clocks do RP2040
 
 // buzzer.c arquivo com funções para controle do buzzer
-// connect_wifi.c arquivo com funções para conexão wi-fi
+// connect_wifi.c arquivo com funções para conexão wi-fi                            !!! edite as configurações da rede nesse arquivo !!!
 // global_manage.c arquivo com funções para controle das varáveis globais
 // init_config.c arquivo com funções para inicialização dos periférico
 // server.c arquivo com funções relativas ao web_server
