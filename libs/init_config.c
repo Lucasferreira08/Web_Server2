@@ -56,3 +56,21 @@ void init_pins()
     gpio_init(BLUE_PIN);
     gpio_set_dir(BLUE_PIN, GPIO_OUT);
 }
+
+// Inicializa o PIO para a matriz de LEDs e retorna o número do state machine usado
+uint pio_init(PIO pio)
+{
+    // Ajusta o clock do RP2040 para 128 MHz (128000 kHz)
+    set_sys_clock_khz(128000, false);
+
+    // Carrega o programa PIO na memória do PIO e retorna o offset onde ele foi colocado
+    uint offset = pio_add_program(pio, &pio_matrix_program);
+
+    // Reserva um state machine livre (bloqueante) e retorna seu índice
+    uint sm = pio_claim_unused_sm(pio, true);
+
+    // Inicializa o state machine com o programa carregado, definindo pino de saída
+    pio_matrix_program_init(pio, sm, offset, OUT_PIN);
+
+    return sm;
+}

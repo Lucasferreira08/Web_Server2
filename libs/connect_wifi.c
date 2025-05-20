@@ -7,8 +7,8 @@
 
 #include "lwip/netif.h"
 
-const char WIFI_SSID[] = "Lucas";
-const char WIFI_PASSWORD[] = "jrxnje23";
+const char WIFI_SSID[] = "";
+const char WIFI_PASSWORD[] = "";
 
 int connect_wifi()
 {

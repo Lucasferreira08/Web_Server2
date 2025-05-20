@@ -7,6 +7,7 @@
 #include "server.h"            // Contém funções relacionadas à inicialização de um servidor (provavelmente HTTP ou socket)
 #include "init_config.h"       // Contém funções para inicializar periféricos e configurações gerais
 #include "global_manage.h"     // Pode conter variáveis globais e funções auxiliares compartilhadas
+#include "matriz.h"           // Controle de matriz de LEDs para alertas visuais
 
 #include "FreeRTOS.h"        // Kernel FreeRTOS
 #include "task.h"            // API de criação e controle de tarefas FreeRTOS
@@ -62,7 +63,7 @@ void vDisplayTask()
     }
 }
 
-// Tarefa que controla o display
+// Tarefa que controla o buzzer e o led rgb
 void vBuzzerTask()
 {
     // Inicializa o buzzer
@@ -72,25 +73,38 @@ void vBuzzerTask()
 
     while (true)
     {
-        if (get_buzzer()==BUZZER_ATIVADO) 
+        if (get_buzzer()==BUZZER_ATIVADO) // se o o buzzer estiver ativo aciona o buzzer e o led rgb
         {
-            gpio_put(RED_PIN, 0);
-            gpio_put(BLUE_PIN, 1);
-            pwm_set_gpio_level(BUZZER_PIN, 2048);
+            //gpio_put(RED_PIN, 0);
+            gpio_put(BLUE_PIN, 1); // acende led azul
+            pwm_set_gpio_level(BUZZER_PIN, 2048);  // ativa buzzer
             vTaskDelay(pdMS_TO_TICKS(100));    // Esperar 100ms  
 
-            gpio_put(BLUE_PIN, 0);
-            gpio_put(RED_PIN, 1);
-            pwm_set_gpio_level(BUZZER_PIN, 0);
+            gpio_put(BLUE_PIN, 0); // apaga led azul
+            gpio_put(RED_PIN, 1); // acende led vermelho
+            pwm_set_gpio_level(BUZZER_PIN, 0);  // desativa buzzer
             vTaskDelay(pdMS_TO_TICKS(100));    // Esperar 100ms 
             gpio_put(RED_PIN, 0);
         }
-        // else 
-        // {
-        //     gpio_put(BLUE_PIN, 0);
-        //     gpio_put(RED_PIN, 0);
-        //     vTaskDelay(pdMS_TO_TICKS(100));    // Esperar 100ms 
-        // }
+    }
+}
+
+// Tarefa que controla a matriz
+void vMatrizTask()
+{
+    PIO pio = pio0;
+    uint sm = pio_init(pio); // Inicializa State Machine para PIO
+    
+    while (true)
+    {
+        if (get_buzzer()==BUZZER_ATIVADO) // se o o buzzer estiver ativo a matriz também deve ser ativada
+        {
+            desenhar_alerta(pio, sm);  // desenha uma exclamação na matriz
+            vTaskDelay(pdMS_TO_TICKS(200));    // Esperar 100ms  
+
+            apagar_matriz(pio, sm);  // apaga a matriz
+            vTaskDelay(pdMS_TO_TICKS(200));    // Esperar 100ms 
+        }
     }
 }
 
@@ -99,16 +113,17 @@ int main()
     // Inicializa todas as interfaces padrão de entrada/saída
     stdio_init_all();
 
-    sleep_ms(10000);
-
     // Desativa o buzzer (define o estado como inativo)
     desativar_buzzer();
+
     // Define a prioridade atual
     set_prioridade(DISPLAY_DESATIVADO);
 
+    // Cria tarefas com prioridades e pilhas mínimas
     xTaskCreate(vServerTask, "Server Task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
     xTaskCreate(vDisplayTask, "Display Task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
     xTaskCreate(vBuzzerTask, "Buzzer Task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+    xTaskCreate(vMatrizTask, "Matriz Task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
 
     // Inicia o scheduler do FreeRTOS
     vTaskStartScheduler();

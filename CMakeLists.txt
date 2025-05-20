@@ -37,7 +37,8 @@ add_executable(${PROJECT_NAME} Web_Server2.c
             ${CMAKE_CURRENT_LIST_DIR}/libs/server.c
             ${CMAKE_CURRENT_LIST_DIR}/libs/init_config.c
             ${CMAKE_CURRENT_LIST_DIR}/libs/ssd1306.c
-            ${CMAKE_CURRENT_LIST_DIR}/libs/global_manage.c)
+            ${CMAKE_CURRENT_LIST_DIR}/libs/global_manage.c
+            ${CMAKE_CURRENT_LIST_DIR}/libs/matriz.c)
 
 pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/pio_matrix.pio)
 
